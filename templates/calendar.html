@@ -1,29 +1,17 @@
+{% extends 'base.html' %}
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
 
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
+{% block add_style %}
+  <link href="{{url_for('static', filename='css/fullcalendar.css')}}" rel='stylesheet'>
+  <link rel="stylesheet" href="{{url_for('static', filename='css/calendar.css')}}">
+{% endblock %}   
 
-    <title>Календарь событий</title>
+  {% block title %}Календарь событий {% endblock %}
 
-    <!-- Bootstrap Core CSS -->
-    <link href="{{url_for('static', filename='css/bootstrap.min.css')}}" rel="stylesheet">
-	
-	<!-- FullCalendar -->
-	<link href="{{url_for('static', filename='css/fullcalendar.css')}}" rel='stylesheet'>
-	<link rel="stylesheet" href="{{url_for('static', filename='css/calendar.css')}}">
-
-</head>
-
-<body>
-    <!-- Page Content -->
-    <div class="container">
-
+  
+{% block content %}
         <div class="row">
             <div class="col-lg-12 text-center">
                 <div id="calendar" class="col-centered">
@@ -40,7 +28,6 @@
 			<form class="form-horizontal" method="POST">
 			
 			  <div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 				<h4 class="modal-title" id="myModalLabel">Добавить событие</h4>
 			  </div>
 			  <div class="modal-body">
@@ -82,7 +69,7 @@
 				
 			  </div>
 			  <div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+				<button type="button" class="btn btn-default" data-bs-dismiss="modal">Закрыть</button>
 				<button type="submit" class="btn btn-primary">Сохранить</button>
 			  </div>
 			</form>
@@ -98,7 +85,6 @@
 			<div class="modal-content">
 			<form class="form-horizontal" method="POST" action="editEvent">
 			  <div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 				<h4 class="modal-title" id="myModalLabel">Редактировать событие</h4>
 			  </div>
 			  <div class="modal-body">
@@ -138,7 +124,7 @@
 				
 			  </div>
 			  <div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+				<button type="button" class="btn btn-default" data-bs-dismiss="modal">Закрыть</button>
 				<button type="submit" class="btn btn-primary">Сохранить</button>
 			  </div>
 			</form>
@@ -146,9 +132,10 @@
 		  </div>
 		</div>
 
-    </div>
-    <!-- /.container -->
+{% endblock %}
 
+
+{% block add_scripts %}
     <!-- jQuery Version 1.11.1 -->
     <script src="{{url_for('static', filename='js/jquery.js')}}"></script>
 
@@ -167,8 +154,5 @@
 		var events = {{events|tojson}};
 		show_all(events);
 	});
-
 </script>
-</body>
-
-</html>
+{% endblock %}

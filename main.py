@@ -138,7 +138,6 @@ def calendar():
         return redirect(url_for('calendar'))
     else:
         items = Event.query.all()
-        # events = json.dumps([item.to_dict() for item in items], ensure_ascii=False)
         events = [item.to_dict() for item in items]
         for event in events:
             date_el, time_el = event['start'].split()
