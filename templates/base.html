@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
+    <title>{% block title %} {% endblock %}</title>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+              <a class="navbar-brand" href="/">EduApp</a>
+              <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                  <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">ToDo</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{{url_for('calendar')}}">Календарь</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="#">Уроки</a>
+                  </li>
+                  <li>
+                    <a class="nav-link" href="#">Тесты</a>
+                  </li>
+                  {% if not session['userLogged']%}
+                  <li><a class="nav-link" href="{{url_for('login')}}">Войти</a></li>
+                  {% else %}
+                  
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{session['userLogged']}}
+                    </a>            
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="#">Профиль</a></li>
+                      <li><a class="dropdown-item" href="{{url_for('logout')}}">Выйти</a></li>
+                    </ul>
+                  </li>
+                  {% endif %}
+
+                </ul>
+                <form class="d-flex" role="search">
+                  <input class="form-control me-2" type="search" placeholder="Введите запрос" aria-label="Search">
+                  <button class="btn btn-outline-success" type="submit">Найти</button>
+                </form>
+              </div>
+            </div>
+          </nav>
+          {% for cat, msg in get_flashed_messages(True) %}
+          <div class="flash alert {{cat}}">
+              {{msg}}
+          </div>
+          {% endfor %}  
+        {% block content %} {% endblock %}
+        <footer>
+            Виктор Ларионов <br> 2024 г.
+        </footer>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>    
+</body>
+</html>

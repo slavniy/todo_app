@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %} Мои задачи {% endblock %}
+{% block content %} 
+<h1>Task manager</h1>
+<form method="POST">
+    <div class="row">
+        <div class="col-md-10"><input class="form-control" type="text" id="content" name="content"></div>
+        <div class="col-md-2"><input class="btn btn-primary" type="submit" value="Create task"></div>
+    </div>
+</form>
+<table class="table">
+    <tr>
+        <th>Задача</th>
+        <th>Дата</th>
+        <th>Действия</th>
+    </tr>
+    {% for task in tasks %}
+    <tr>
+        <td>{{task.content}}</td>
+        <td>{{task.datetime}}</td>
+        <td><a href="/edit/{{task.id}}"><img class="icon" src="{{url_for('static', filename='imgs/edit.png')}}" alt=""></a> <a href="/delete/{{task.id}}"><img class="icon" src="{{url_for('static', filename='imgs/delete.png')}}" alt=""></a></td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

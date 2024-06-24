@@ -1,0 +1,23 @@
+h1{
+    color: rgb(98, 1, 1);
+}
+table{
+    width: 100%;
+}
+
+.icon{
+    width: 30px;
+}
+
+footer{
+    text-align: center;
+}
+
+.error{
+    background-color: rgb(255, 201, 100);
+    color: red;
+}
+.info{
+    background-color: skyblue;
+    color:blue;
+}
