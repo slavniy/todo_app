@@ -21,3 +21,8 @@ footer{
     background-color: skyblue;
     color:blue;
 }
+
+.auth-form{
+    width: 500px;
+    margin: auto;
+}

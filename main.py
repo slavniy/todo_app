@@ -2,6 +2,7 @@ from flask import Flask, render_template, url_for, request, redirect, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from hashlib import md5
+from forms import RegistationForm, LoginForm
 SALT = 'JAKLDFJ@ajsflj(@kdsf@@@!19435f)'
 import json
 
@@ -124,6 +125,20 @@ def signup():
             # except:
             #     return 'Что-то пошло не так!'
     return render_template('signup.html')
+
+@app.route('/register', methods=["POST", "GET"])
+def register():
+    form = RegistationForm()
+    if form.validate_on_submit():
+        flash(f'Account created for {form.username.data}!', 'info')
+        return redirect(url_for('index'))
+    return render_template('register.html', form=form)
+
+@app.route('/log')
+def log():
+    form = LoginForm()
+    return render_template('log.html', form=form)
+
 
 @app.route('/calendar', methods=['GET', 'POST'])
 def calendar():
