@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %} Уроки {% endblock %}
+{% block content %} 
+<h1>Уроки автора {{user['username']}}</h1>
+{% for lesson in user.lessons %}
+<h2>{{lesson['title']}}</h2>
+<p>{{lesson['content']}}</p>
+<i>Автор <a href="\author\{{lesson['author']['id']}}">{{lesson['author']['username']}}</a></i>
+{% endfor %}
+
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %} Уроки {% endblock %}
+{% block content %} 
+<h1>Уроки</h1>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.title.label(class="form-control-label") }}
+    {{ form.title(class="form-control") }}
+    {{ form.content.label(class="form-control-label") }}
+    {{ form.content(class="form-control") }}
+    {{ form.submit(class="btn btn-outline-info") }}
+</form>
+{% for lesson in lessons %}
+<h2>{{lesson['title']}}</h2>
+<p>{{lesson['content']}}</p>
+<i>Автор <a href="\author\{{lesson['author']['id']}}">{{lesson['author']['username']}}</a></i>
+{% endfor %}
+
+{% endblock %}

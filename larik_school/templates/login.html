@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}
+Авторизация
+{% endblock %}
+
+{% block content %}
+<div>
+        <form class="px-4 py-3 auth-form" method="POST">
+                    {{form.hidden_tag()}}
+                    <div class="mb-3">
+                        {{form.email.label(class="form-control-label")}}
+                        {{form.email(class='form-control' if not form.email.errors else 'form-control is-invalid')}}
+                    </div>
+                    <div class="mb-3">
+                        {{form.password.label(class="form-control-label")}}
+                        {{form.password(class='form-control' if not form.password.errors else 'form-control is-validate')}}
+                    </div>
+                    <div class="mb-3">
+                        {{form.remember}} {{form.remember.label(class='form-control-label')}}
+                    </div>
+                    <div class="mb-3">
+                        <a href="{{url_for('register')}}">Еще не зарегистрированы?</a> <a href="#">Забыли пароль?</a>
+                    </div>
+                    {{form.submit(class='btn btn-outline-info')}}
+        </form>
+</div>       
+ 
+{% endblock %}
