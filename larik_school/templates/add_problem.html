@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}
+Добавление вопроса
+{% endblock %}
+
+{% block content %}
+<div>
+        <form method="POST" class="auth-form" enctype=multipart/form-data>
+                    {{form.hidden_tag()}}
+                    <div class="mb-3">
+                        {{form.question.label(class="form-control-label")}}
+                        {{form.question(class='form-control' if not form.question.errors else 'form-control is-invalid')}}
+                    </div>
+                    <div class="mb-3">
+                        {{form.file.label(class='form-control-label')}}<br>
+                        {{form.file}}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{form.answer.label(class="form-control-label")}}
+                        {{form.answer(class='form-control' if not form.answer.errors else 'form-control is-validate')}}
+                    </div>
+                    {{form.submit(class='btn btn-outline-info')}}
+        </form>
+</div>       
+ 
+{% endblock %}

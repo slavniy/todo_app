@@ -1,6 +1,10 @@
-from larik_school import db
+from larik_school import db, login_manager
 from datetime import datetime
+from flask_login import UserMixin
 
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -11,7 +15,19 @@ class Task(db.Model):
     def __repr__(self) -> str:
         return f"Task {self.id}: {self.content}"
     
-class User(db.Model):
+class Problem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.Text, nullable=False)
+    img = db.Column(db.String(100))
+    answer = db.Column(db.String, nullable=False)
+
+class Lesson(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(20), nullable=False)
+    content = db.Column(db.String, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String, nullable=False, unique=True)
     username = db.Column(db.String, nullable=False)
@@ -32,8 +48,3 @@ class Event(db.Model):
         return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns} 
     
 
-class Lesson(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(20), nullable=False)
-    content = db.Column(db.String, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

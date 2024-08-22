@@ -1,9 +1,11 @@
 from flask import render_template, url_for, request, redirect, flash, session, abort, jsonify
-from larik_school.forms import RegistationForm, LoginForm, LessonsForm
-from larik_school.models import Task, User, Event, Lesson
+from larik_school.forms import RegistationForm, LoginForm, LessonsForm, ProblemForm
+from larik_school.models import Task, User, Event, Lesson, Problem
 from larik_school import app, db, bcrypt
 from datetime import datetime
 from hashlib import md5
+from flask_login import login_user, current_user, logout_user, login_required
+import os
 
 SALT = 'JAKLDFJ@ajsflj(@kdsf@@@!19435f)'
 import json
@@ -15,17 +17,16 @@ def format_date(datetime):
     return f'{str(datetime.day).zfill(2)}.{str(datetime.month).zfill(2)}.{datetime.year} {str(datetime.hour).zfill(2)}:{str(datetime.minute).zfill(2)}'
 
 @app.route('/', methods=['GET', 'POST'])
+@login_required
 def index():
-    if 'userLogged' not in session:
-        return redirect(url_for('login'))
     if request.method == 'GET':
-        tasks = Task.query.filter(Task.user_id==session.get('userId')).all()
+        tasks = Task.query.filter(Task.user_id==current_user.id).all()
         for task in tasks:
             task.datetime = format_date(task.datetime)
         return render_template('index.html', tasks=tasks)
     else:
         try:
-            new_task = Task(content=request.form["content"],user_id=session['userId'])
+            new_task = Task(content=request.form["content"],user_id=current_user.id)
             db.session.add(new_task)
             db.session.commit()
             return redirect('/')
@@ -46,12 +47,11 @@ def login():
         return redirect(url_for('index'))
     elif form.validate_on_submit():
         email = form.email.data
-        password_hash = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User.query.filter(User.email==email, User.password==password_hash).first()
-        if user:
-            session['userLogged'] = user.username
-            session['userId'] = user.id
-            return redirect(url_for('index'))
+        user = User.query.filter(User.email==email).first()    
+        if user and bcrypt.check_password_hash(user.password, form.password.data):
+            login_user(user, remember=form.remember.data)
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('index'))
         else:
             flash('Такой пользователь не найден! Проверьте логин и пароль!', 'error')
     return render_template('login.html', form=form)
@@ -74,6 +74,7 @@ def register():
 
 
 @app.route('/calendar', methods=['GET', 'POST'])
+@login_required
 def calendar():
     if request.method == 'POST':
         title = request.form['title']
@@ -99,6 +100,7 @@ def calendar():
     
 
 @app.route('/editEvent', methods=['POST'])
+@login_required
 def editEvent():
     id = request.form['id']
     title = request.form['title']
@@ -112,6 +114,7 @@ def editEvent():
     db.session.commit()
     return redirect(url_for('calendar'))
 @app.route('/editEventDate', methods=['POST'])
+@login_required
 def editEventDate():
     data = request.form.to_dict()
     event = Event.query.filter(Event.id == data['id'])
@@ -120,8 +123,7 @@ def editEventDate():
     return 'OK'
 @app.route('/logout')
 def logout():
-    session.pop('userLogged', None)
-    session.pop('userId', None)
+    logout_user()
     return redirect(url_for('index'))
 @app.errorhandler(404)
 def pageNotFound(error):
@@ -137,7 +139,7 @@ def lessons():
         return render_template('lessons.html', lessons=lessons, form=form)
     else:
         if form.validate_on_submit():
-            new_lesson = Lesson(title=form.title.data, content=form.content.data, user_id=session['userId'])
+            new_lesson = Lesson(title=form.title.data, content=form.content.data, user_id=current_user.id)
             db.session.add(new_lesson)
             db.session.commit()
             flash('Урок добавлен', 'success')
@@ -146,3 +148,79 @@ def lessons():
 def author(author_id):
     user = User.query.get(author_id)
     return render_template('author.html',user=user)
+
+@app.route('/account')
+@login_required
+def account():
+    return f'Страница аккаунта {current_user.username}'
+
+
+
+@app.route('/problem/add', methods=['POST', 'GET'])
+def add_problem():
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    form = ProblemForm()
+    filename = None
+    if form.validate_on_submit(): 
+        if 'file' in request.files:
+            file = request.files['file']
+            if file.filename != '':  
+                filename = file.filename
+                file.save(os.path.join(basedir,'static','imgs', filename))
+        if filename:
+            new_problem = Problem(question=form.question.data, answer=form.answer.data,img=filename)
+        else:
+            new_problem = Problem(question=form.question.data, answer=form.answer.data)
+        db.session.add(new_problem)
+        db.session.commit()
+        flash('Вопрос добавлен в базу!', 'info')
+        return redirect(url_for('test'))
+                
+    return render_template('add_problem.html',form=form)
+
+@app.route('/problem/delete/<problem_id>')
+def problem_delete(problem_id):
+    problem = Problem.query.get(int(problem_id))
+    db.session.delete(problem)
+    db.session.commit()
+    return redirect(url_for('test'))
+
+@app.route('/problem/edit/<problem_id>', methods=['POST', 'GET'])
+def problem_edit(problem_id):
+    problem = Problem.query.get(int(problem_id))
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    form = ProblemForm()
+    if form.validate_on_submit(): 
+        if 'file' in request.files:
+            file = request.files['file']
+            if file.filename != '':  
+                filename = file.filename
+                file.save(os.path.join(basedir,'static','imgs', filename))
+                problem.img = filename
+        problem.question = form.question.data
+        problem.question = form.question.data
+        problem.answer = form.answer.data
+        db.session.commit()
+        flash('Вопрос отредактирован!', 'info')
+        return redirect(url_for('test'))   
+    form.question.data = problem.question
+    form.answer.data = problem.answer             
+    return render_template('add_problem.html',form=form)
+
+
+
+
+
+
+@app.route('/test')
+def test():
+    problems = Problem.query.all()
+    return render_template('test.html', problems=problems)
+
+@app.route('/check_answer', methods=['POST', 'GET'])
+def check_answer():
+    guess = request.form['answer']
+    problem_id = request.form['problem_id']
+    problem = Problem.query.get(int(problem_id))
+    answer = problem.answer
+    return  str(answer.lower() == guess.lower())
