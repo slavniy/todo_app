@@ -20,6 +20,15 @@ class Problem(db.Model):
     question = db.Column(db.Text, nullable=False)
     img = db.Column(db.String(100))
     answer = db.Column(db.String, nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
+
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title =db.Column(db.String, nullable=False)
+    problems = db.relationship('Problem', backref = 'category')
+
+    def __repr__(self) -> str:
+        return f'Категория id:{self.id}, название:{self.title}'
 
 class Lesson(db.Model):
     id = db.Column(db.Integer, primary_key=True)

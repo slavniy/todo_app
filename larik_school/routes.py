@@ -1,6 +1,6 @@
 from flask import render_template, url_for, request, redirect, flash, session, abort, jsonify
-from larik_school.forms import RegistationForm, LoginForm, LessonsForm, ProblemForm
-from larik_school.models import Task, User, Event, Lesson, Problem
+from larik_school.forms import RegistationForm, LoginForm, LessonsForm, ProblemForm, CategoryForm
+from larik_school.models import Task, User, Event, Lesson, Problem, Category
 from larik_school import app, db, bcrypt
 from datetime import datetime
 from hashlib import md5
@@ -157,9 +157,12 @@ def account():
 
 
 @app.route('/problem/add', methods=['POST', 'GET'])
+@login_required
 def add_problem():
     basedir = os.path.abspath(os.path.dirname(__file__))
     form = ProblemForm()
+    categories = Category.query.all()
+    form.category.choices = [(category.id,category.title) for category in categories] 
     filename = None
     if form.validate_on_submit(): 
         if 'file' in request.files:
@@ -168,14 +171,13 @@ def add_problem():
                 filename = file.filename
                 file.save(os.path.join(basedir,'static','imgs', filename))
         if filename:
-            new_problem = Problem(question=form.question.data, answer=form.answer.data,img=filename)
+            new_problem = Problem(question=form.question.data, answer=form.answer.data,img=filename, category_id=form.category.data)
         else:
-            new_problem = Problem(question=form.question.data, answer=form.answer.data)
+            new_problem = Problem(question=form.question.data, answer=form.answer.data, category_id=form.category.data)
         db.session.add(new_problem)
         db.session.commit()
         flash('Вопрос добавлен в базу!', 'info')
-        return redirect(url_for('test'))
-                
+        return redirect(url_for('test'))           
     return render_template('add_problem.html',form=form)
 
 @app.route('/problem/delete/<problem_id>')
@@ -190,6 +192,8 @@ def problem_edit(problem_id):
     problem = Problem.query.get(int(problem_id))
     basedir = os.path.abspath(os.path.dirname(__file__))
     form = ProblemForm()
+    categories = Category.query.all()
+    form.category.choices = [(category.id,category.title) for category in categories] 
     if form.validate_on_submit(): 
         if 'file' in request.files:
             file = request.files['file']
@@ -204,7 +208,8 @@ def problem_edit(problem_id):
         flash('Вопрос отредактирован!', 'info')
         return redirect(url_for('test'))   
     form.question.data = problem.question
-    form.answer.data = problem.answer             
+    form.answer.data = problem.answer  
+    form.category.data = problem.category_id      
     return render_template('add_problem.html',form=form)
 
 
@@ -212,10 +217,22 @@ def problem_edit(problem_id):
 
 
 
-@app.route('/test')
-def test():
-    problems = Problem.query.all()
-    return render_template('test.html', problems=problems)
+@app.route('/tasks', methods=['POST', 'GET'])
+def tasks():
+    problems = []
+    try:
+        if request.method == 'POST':
+            if 'problem_id' in  request.form:
+                problem = Problem.query.get(int(request.form['problem_id']))
+                if not problem:
+                    raise ValueError
+                problems = [problem]
+            if 'category_id' in request.form:
+                problems = Problem.query.filter_by(category_id=int(request.form['category_id'])).all()
+    except:
+        problems = []
+    categories = Category.query.all()
+    return render_template('tasks.html', problems=problems, categories=categories)
 
 @app.route('/check_answer', methods=['POST', 'GET'])
 def check_answer():
@@ -224,3 +241,31 @@ def check_answer():
     problem = Problem.query.get(int(problem_id))
     answer = problem.answer
     return  str(answer.lower() == guess.lower())
+
+
+@app.route('/category', methods=['GET', 'POST'])
+def category():
+    categories = Category.query.all()
+    form = CategoryForm()
+    if form.validate_on_submit():
+        try:
+            new_category = Category(title=form.title.data)
+            db.session.add(new_category)
+            db.session.commit()
+            return redirect(url_for('category'))
+        except:
+            return 'Ошибка записи в БД'   
+    return render_template('category.html', form=form, categories=categories)
+
+@app.route('/category/<int:category_id>/delete')
+def delete_category(category_id):
+    category = Category.query.get(category_id)
+    db.session.delete(category)
+    db.session.commit()
+    return redirect(url_for('category'))
+
+@app.route('/get_problem', methods=['POST', 'GET'])
+def get_problem():
+    problem_id = request.form['task_number']
+    problem = Problem.query.get(int(problem_id))
+    return problem.question

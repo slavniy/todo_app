@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %} Категории {% endblock %}
+{% block content %} 
+<h1>Categories manager</h1>
+<form method="POST">
+    <div class="row">
+        {{form.hidden_tag()}}
+        {{form.title.label(class='form-control-label')}}
+        <div class="row">
+            <div class="col-md-8">
+                {{form.title(class='form-control')}}
+            </div>
+            <div class="col-md-4">
+                {{form.submit(class='btn btn-primary')}}
+            </div>
+        </div>  
+    </div>
+</form>
+{% if categories %}
+<table class="table">
+    <tr>
+        <th>Категория</th>
+        <th>Действия</th>
+    </tr>
+    {% for category in categories %}
+    <tr>
+        <td>{{category.title}}</td>
+        <td><a href="/category/{{category.id}}/edit"><img class="icon" src="{{url_for('static', filename='imgs/edit.png')}}" alt=""></a> <a href="/category/{{category.id}}/delete"><img class="icon" src="{{url_for('static', filename='imgs/delete.png')}}" alt=""></a></td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<h2>Нет созданных категорий</h2>
+{% endif %}
+{% endblock %}

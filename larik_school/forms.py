@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, FileField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, FileField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo
 from wtforms import validators
 from larik_school.models import User
@@ -40,6 +40,11 @@ class LessonsForm(FlaskForm):
 
 class ProblemForm(FlaskForm):
     question = TextAreaField('Вопрос', validators=[DataRequired()])
+    category = SelectField('Выбор категории')
     file = FileField('Добавить файл')
     answer = StringField('Ответ', validators=[DataRequired()])
     submit = SubmitField('Добавить вопрос')
+
+class CategoryForm(FlaskForm):
+    title = StringField('Название категории', validators=[DataRequired(), Length(min=3, max=30)])
+    submit = SubmitField('Добавить')

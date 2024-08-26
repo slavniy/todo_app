@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}
+Банк заданий
+{% endblock %}
+{% block content %}
+<h1>Банк заданий</h1>
+<p class="test"></p>
+<div class="row">
+    <div class="col-md-4">
+        <form method="POST">
+        Поиск по номеру <br>
+        <input type="text" name="problem_id">
+        <input type="submit" value="Показать задачу"> 
+        </form>
+    </div>
+    <div class="col-md-8">Поиск по типу <br>
+        <form method="POST">
+        <select name="category_id">
+            {% for category in categories%}
+            <option value="{{category.id}}">{{category.title}}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Найти все задачи">
+        </form>
+    </div>
+</div>
+
+{% for problem in problems %}  
+<div class="card p-3">
+    <h3 class="card-title">Вопрос {{loop.index}} из категории "{{problem.category.title}}" (#{{problem.id}})<a href="{{url_for('problem_edit', problem_id=problem.id)}}"><img class="icon" src="{{url_for('static', filename='imgs/edit.png')}}" alt=""></a> <a href="{{url_for('problem_delete', problem_id=problem.id)}}"><img class="icon" src="{{url_for('static', filename='imgs/delete.png')}}" alt=""></a></h3>
+    <p class="card-text">{{problem.question|safe}}</p>
+    {% if problem.img %}
+    <img src="{{url_for('static', filename='imgs/' + problem.img)}}" class="mb-3 question-img">
+    {% endif %}
+    <form>
+    <div class="row">
+        <div class="col-md-8"><input type="hidden" value="{{problem.id}}" name="problem_id"></div>
+        <div class="col-md-2"><input type="text" class="form-control" name="answer"></div>
+        <div class="col-md-2"> <input type="button" class="btn btn-primary" onclick="check_answer(this)" value="Ответить"></div>
+    </div>
+    </form>
+</div> 
+
+{% endfor %}
+<script>
+    function check_answer(el) {
+        $card = $(el).closest('.card');
+        $form = $(el).closest('form');
+        $(el).addClass('disabled')
+        $.ajax({
+            type: "POST",
+            url: "/check_answer",
+            data: $form.serialize(),
+            success: function(response) {
+                if (response == 'True')
+                    {$card.css({"backgroundColor":"#b3ffb3"});}
+                else 
+                    {$card.css({"backgroundColor":"#ff9595"});}
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function find_problem(){
+        $task_number = $('[name="task_number"]').val();
+        $.ajax({
+            type: "POST",
+            url: "/get_problem",
+            data: {'task_number': $task_number},
+            success: function(response) {
+                $('.test').text(response);
+                console.log(response)
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+        
+    }
+</script>
+{% endblock %}
