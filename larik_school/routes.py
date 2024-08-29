@@ -177,7 +177,7 @@ def add_problem():
         db.session.add(new_problem)
         db.session.commit()
         flash('Вопрос добавлен в базу!', 'info')
-        return redirect(url_for('test'))           
+        return redirect(url_for('tasks'))           
     return render_template('add_problem.html',form=form)
 
 @app.route('/problem/delete/<problem_id>')
@@ -269,3 +269,16 @@ def get_problem():
     problem_id = request.form['task_number']
     problem = Problem.query.get(int(problem_id))
     return problem.question
+
+@app.route('/create/variant', methods=['GET', 'POST'])
+@login_required
+def varian_create():
+    categories = Category.query.all()
+    tasks = []
+    if request.method == 'POST':
+        for key in request.form:
+            if request.form[key].isdigit():
+                category_id = int(key)
+                tasks.extend(Problem.query.filter_by(category_id=category_id).limit(request.form[key]))
+    return render_template('add_variant.html', categories=categories, problems=tasks)
+

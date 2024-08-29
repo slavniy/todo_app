@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}
+Создание варианта
+{% endblock %}
+
+{% block content %}
+<div>
+        <form method="POST">
+            <table>
+                {% for category in categories%}
+                <tr>
+                    <td>{{category.title}}</td>
+                    <td><input type="text" name="{{category.id}}"></td>
+                </tr>
+                {% endfor %}
+            </table>
+            <input type="submit" value="сгенерировать">
+        </form>
+
+        {% for problem in problems %}  
+        <div class="card p-3">
+            <h3 class="card-title">Вопрос {{loop.index}} из категории "{{problem.category.title}}" (#{{problem.id}})<a href="{{url_for('problem_edit', problem_id=problem.id)}}"><img class="icon" src="{{url_for('static', filename='imgs/edit.png')}}" alt=""></a> <a href="{{url_for('problem_delete', problem_id=problem.id)}}"><img class="icon" src="{{url_for('static', filename='imgs/delete.png')}}" alt=""></a></h3>
+            <p class="card-text">{{problem.question|safe}}</p>
+            {% if problem.img %}
+            <img src="{{url_for('static', filename='imgs/' + problem.img)}}" class="mb-3 question-img">
+            {% endif %}
+            <form>
+            <div class="row">
+                <div class="col-md-8"><input type="hidden" value="{{problem.id}}" name="problem_id"></div>
+                <div class="col-md-2"><input type="text" class="form-control" name="answer"></div>
+                <div class="col-md-2"> <input type="button" class="btn btn-primary" onclick="check_answer(this)" value="Ответить"></div>
+            </div>
+            </form>
+        </div> 
+        
+        {% endfor %}
+</div>       
+ 
+{% endblock %}

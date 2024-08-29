@@ -22,6 +22,9 @@ class Problem(db.Model):
     answer = db.Column(db.String, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
 
+    def __repr__(self):
+        return f'{self.question}'
+
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title =db.Column(db.String, nullable=False)
